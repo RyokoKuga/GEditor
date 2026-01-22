@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>GfEditer - 4-Pane Molecular Studio (Version 017)</title>
+<title>GfEditer - Dual Mode Molecular Studio (Version 018)</title>
 
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
@@ -14,7 +14,6 @@
 			--app-bg: #f8f9fa;
 			--app-header: #ffffff;
 			--app-border: #e0e2e6;
-			--app-text-main: #202124;
 			--accent-blue: #1a73e8;
 			--accent-red: #d93025;
 			--accent-green: #1e8e3e;
@@ -24,7 +23,6 @@
 
 		body {
 			background-color: var(--app-bg);
-			color: var(--app-text-main);
 			font-family: 'Inter', sans-serif;
 			margin: 0;
 			display: flex;
@@ -46,7 +44,6 @@
 
 		.logo { font-size: 20px; font-weight: 700; }
 		.logo span.g-accent { color: var(--accent-blue); }
-
 		#state { font-size: 12px; color: #174ea6; background: #e8f0fe; padding: 5px 15px; border-radius: 20px; margin-left: 15px; }
 
 		.header-btn {
@@ -56,64 +53,41 @@
 		}
 		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
 		#ext-btn-terminate { background: var(--accent-red); color: var(--white); }
-		#ext-btn-terminate:disabled { opacity: 0.3; cursor: default; }
+		#ext-btn-switch { background: #3c4043; color: var(--white); }
 		#ext-btn-babel { background: white; border-color: var(--app-border); }
-		#ext-btn-babel.active { background: #e6f4ea; color: var(--accent-green); border-color: var(--accent-green); }
 
-		.app-container {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			padding: 10px;
-			gap: 10px;
-			min-height: 0;
+		.app-container { flex: 1; position: relative; min-height: 0; }
+
+		/* モードごとの表示制御 */
+		.mode-panel {
+			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			display: none; padding: 10px; box-sizing: border-box; gap: 10px;
 		}
+		.mode-panel.active { display: flex; }
 
-		/* 4分割の行設定 */
-		.pane-row { display: flex; gap: 0; min-height: 0; }
-		#row-top { flex: 3; }    /* 上段（2D/3D）を広めに */
-		#row-bottom { flex: 2; } /* 下段（GAMESS） */
-
-		.tool-pane {
-			display: flex;
-			flex-direction: column;
-			background: #fff;
-			border: 1px solid var(--app-border);
-			border-radius: 10px;
-			overflow: hidden;
-		}
-
-		.col-left { flex: 0 0 50%; } /* JSで幅を制御 */
+		/* 共通のカラム構造 */
+		.tool-pane { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--app-border); border-radius: 10px; overflow: hidden; }
+		.col-left { flex: 0 0 50%; }
 		.col-right { flex: 1; position: relative; }
+		.resizer { width: 10px; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+		.resizer::after { content: ""; width: 2px; height: 40px; background: #ddd; border-radius: 2px; }
 
 		#composer, #chemViewer { width: 100% !important; height: 100% !important; }
 
-		/* 下段設定パネル */
-		#section-config { padding: 20px; background: #fdfdfd; overflow-y: auto; }
-		.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-		.config-group { display: flex; flex-direction: column; gap: 5px; }
-		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; }
-		.config-group select { padding: 6px; border-radius: 4px; border: 1px solid var(--app-border); font-size: 12px; }
+		/* GAMESS 設定画面スタイル */
+		#gamess-config { padding: 40px; background: #fdfdfd; overflow-y: auto; }
+		.config-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 400px; }
+		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; text-transform: uppercase; }
+		.config-group select { padding: 10px; border-radius: 6px; border: 1px solid var(--app-border); font-size: 14px; width: 100%; }
 
-		/* 下段エディタ */
-		#section-editor { position: relative; display: flex; flex-direction: column; }
+		/* GAMESS エディタスタイル */
 		#gamess-editor {
-			flex: 1; border: none; padding: 15px;
-			font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.4;
+			flex: 1; border: none; padding: 20px;
+			font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.6;
 			background: #1e1e1e; color: #d4d4d4; outline: none; resize: none;
 		}
-		.editor-footer {
-			padding: 8px 15px; background: #2d2d2d; display: flex; justify-content: flex-end;
-		}
-		#ext-btn-download { background: var(--accent-orange); color: white; border: none; padding: 6px 15px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 11px; }
-
-		/* 垂直リサイザーバー */
-		.resizer-v {
-			width: 10px; cursor: col-resize; display: flex; align-items: center; justify-content: center;
-			background: transparent; z-index: 10;
-		}
-		.resizer-v::after { content: ""; width: 2px; height: 40px; background: #ddd; border-radius: 2px; }
-		.resizer-v:hover::after { background: var(--accent-blue); }
+		.editor-footer { padding: 10px 20px; background: #2d2d2d; display: flex; justify-content: flex-end; }
+		#ext-btn-download { background: var(--accent-orange); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; }
 
 		footer { background: var(--app-header); padding: 0 24px; font-size: 11px; color: #70757a; border-top: 1px solid var(--app-border); height: 25px; display: flex; align-items: center; justify-content: flex-end; }
 	</style>
@@ -123,31 +97,32 @@
 	<header>
 		<div style="display:flex; align-items:center;">
 			<div class="logo"><span class="g-accent">G</span>fEditer</div>
-			<div id="state">Ready</div>
+			<div id="state">Modeling Mode</div>
 		</div>
 		<div class="header-right">
 			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
 			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
+			<button id="ext-btn-switch" class="header-btn" onclick="toggleMode()">Switch to GAMESS Mode</button>
 		</div>
 	</header>
 
 	<div class="app-container">
-		<!-- 上段: 2Dエディタ & 3Dビューア -->
-		<div class="pane-row" id="row-top">
+		<!-- モード1: 2D/3D モデリングパネル -->
+		<div id="panel-modeling" class="mode-panel active">
 			<div id="pane-2d" class="tool-pane col-left">
 				<div id="composer" data-widget="Kekule.Editor.Composer" data-predefined-setting="molOnly"></div>
 			</div>
-			<div id="resizer-global" class="resizer-v"></div>
+			<div class="resizer" id="resizer-modeling"></div>
 			<div id="pane-3d" class="tool-pane col-right">
-				<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
+				<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc"></div>
 			</div>
 		</div>
 
-		<!-- 下段: GAMESS設定 & エディタ -->
-		<div class="pane-row" id="row-bottom">
-			<div id="section-config" class="tool-pane col-left">
-				<h3 style="margin-top:0; font-size:14px; color:var(--accent-blue);">GAMESS Settings</h3>
+		<!-- モード2: GAMESS エディタパネル -->
+		<div id="panel-gamess" class="mode-panel">
+			<div id="gamess-config" class="tool-pane col-left">
+				<h2 style="margin-top:0; font-size:18px; color:var(--accent-blue);">GAMESS Configuration</h2>
 				<div class="config-grid">
 					<div class="config-group"><label>Theory (SCFTYP)</label>
 						<select id="cfg-scf" onchange="updateGamessText()"><option value="RHF">RHF</option><option value="UHF">UHF</option><option value="ROHF">ROHF</option></select>
@@ -162,13 +137,13 @@
 						<select id="cfg-charge" onchange="updateGamessText()"><option value="0">0</option><option value="1">+1</option><option value="-1">-1</option></select>
 					</div>
 				</div>
+				<p style="margin-top:30px; font-size:12px; color:#666;">※モデリングモードに戻って分子を変更すると座標も更新されます。</p>
 			</div>
-			<!-- 下段の隙間埋め用ダミーリサイザー -->
-			<div class="resizer-v" style="cursor:default; opacity:0;"></div>
-			<div id="section-editor" class="tool-pane col-right">
+			<div class="resizer" id="resizer-gamess"></div>
+			<div id="pane-editor" class="tool-pane col-right" style="display:flex; flex-direction:column;">
 				<textarea id="gamess-editor" spellcheck="false"></textarea>
 				<div class="editor-footer">
-					<button id="ext-btn-download" onclick="downloadInp()">Download .inp</button>
+					<button id="ext-btn-download" onclick="downloadInp()">Download .inp File</button>
 				</div>
 			</div>
 		</div>
@@ -177,29 +152,45 @@
 	<footer><div>Powered by Kekule.js</div></footer>
 
 	<script>
-	var composer, viewer, domBtnGen, domBtnTerminate, domBtnBabel;
-	var calculator, timeStart;
+	var composer, viewer, domBtnGen, domBtnTerminate, domBtnBabel, domBtnSwitch;
+	var calculator, currentMode = 'modeling';
 
 	function report(msg) { document.getElementById('state').innerHTML = msg; }
 
-	function enableOpenBabel() {
-		Kekule.IO.enableOpenBabelFormats();
-		domBtnBabel.classList.add('active');
-		domBtnBabel.innerHTML = '✓ OpenBabel Enabled';
-		report('OpenBabel Enabled');
+	// モード切り替えロジック
+	function toggleMode() {
+		const panelModeling = document.getElementById('panel-modeling');
+		const panelGamess = document.getElementById('panel-gamess');
+		domBtnSwitch = document.getElementById('ext-btn-switch');
+
+		if (currentMode === 'modeling') {
+			currentMode = 'gamess';
+			panelModeling.classList.remove('active');
+			panelGamess.classList.add('active');
+			domBtnSwitch.innerHTML = 'Back to Modeling Mode';
+			report('GAMESS Mode');
+			updateGamessText(); // 座標の同期
+		} else {
+			currentMode = 'modeling';
+			panelGamess.classList.remove('active');
+			panelModeling.classList.add('active');
+			domBtnSwitch.innerHTML = 'Switch to GAMESS Mode';
+			report('Modeling Mode');
+			syncSizes();
+		}
 	}
 
 	function updateGamessText() {
 		var mol = viewer.getChemObj();
 		var editor = document.getElementById('gamess-editor');
 		if (!mol || mol.getNodeCount() === 0) {
-			editor.value = "! 3D構造を生成するとここに反映されます。";
+			editor.value = "! 3D構造がありません。モデリングモードでGenerate 3Dを実行してください。";
 			return;
 		}
 		var lines = [];
 		lines.push(` $CONTRL SCFTYP=${document.getElementById('cfg-scf').value} RUNTYP=${document.getElementById('cfg-run').value} ICHG=${document.getElementById('cfg-charge').value} COORD=UNIQUE $END`);
 		lines.push(` $BASIS  GBASIS=${document.getElementById('cfg-basis').value} $END`);
-		lines.push(' $DATA\nGAMESS Input by GfEditer (2026)\nC1');
+		lines.push(' $DATA\nGAMESS Input generated by GfEditer (2026)\nC1');
 		for (var i = 0; i < mol.getNodeCount(); ++i) {
 			var node = mol.getNodeAt(i);
 			if (node instanceof Kekule.Atom) {
@@ -217,16 +208,14 @@
 		report('Calculating 3D...');
 		domBtnGen.disabled = true;
 		domBtnTerminate.disabled = false;
-		timeStart = Date.now();
 		calculator = Kekule.Calculator.generate3D(mol, {'forceField': 'MMFF94'},
 			function(generatedMol){
 				domBtnGen.disabled = false;
 				domBtnTerminate.disabled = true;
 				viewer.setChemObj(generatedMol);
-				updateGamessText();
-				report('Ready (' + ((Date.now() - timeStart)/1000).toFixed(2) + 's)');
+				report('Modeling Mode (3D Ready)');
 			},
-			function() { domBtnGen.disabled = false; domBtnTerminate.disabled = true; report('Ready'); }
+			function() { domBtnGen.disabled = false; domBtnTerminate.disabled = true; report('Modeling Mode'); }
 		);
 	}
 
@@ -240,6 +229,12 @@
 		a.click();
 	}
 
+	function enableOpenBabel() {
+		Kekule.IO.enableOpenBabelFormats();
+		document.getElementById('ext-btn-babel').style.background = "#e6f4ea";
+		report('OpenBabel Enabled');
+	}
+
 	function syncSizes() {
 		if (composer) composer.notifyObjectSizeChanged();
 		if (viewer) viewer.notifyObjectSizeChanged();
@@ -250,27 +245,31 @@
 		composer = Kekule.Widget.getWidgetById('composer');
 		domBtnGen = document.getElementById('ext-btn-gen');
 		domBtnTerminate = document.getElementById('ext-btn-terminate');
-		domBtnBabel = document.getElementById('ext-btn-babel');
 
-		// 左右リサイズ同期ロジック
-		const resizer = document.getElementById('resizer-global');
-		const leftCols = document.querySelectorAll('.col-left');
-		let isResizing = false;
+		// リサイズ処理（両モード対応）
+		const setupResizer = (resizerId, panelId) => {
+			const resizer = document.getElementById(resizerId);
+			const leftCol = document.querySelector(`#${panelId} .col-left`);
+			let isResizing = false;
+			resizer.addEventListener('mousedown', (e) => { isResizing = true; e.preventDefault(); });
+			window.addEventListener('mousemove', (e) => {
+				if (!isResizing) return;
+				const newWidth = (e.clientX / window.innerWidth) * 100;
+				if (newWidth > 15 && newWidth < 85) {
+					leftCol.style.flex = `0 0 ${newWidth}%`;
+					syncSizes();
+				}
+			});
+			window.addEventListener('mouseup', () => { isResizing = false; });
+		};
 
-		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize'; e.preventDefault(); });
-		window.addEventListener('mousemove', (e) => {
-			if (!isResizing) return;
-			const newWidth = (e.clientX / window.innerWidth) * 100;
-			if (newWidth > 15 && newWidth < 85) {
-				leftCols.forEach(el => el.style.flex = `0 0 ${newWidth}%`);
-				syncSizes();
-			}
-		});
-		window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
+		setupResizer('resizer-modeling', 'panel-modeling');
+		setupResizer('resizer-gamess', 'panel-gamess');
+
 		window.addEventListener('resize', syncSizes);
-		
-		setTimeout(() => { syncSizes(); updateGamessText(); }, 500);
+		setTimeout(syncSizes, 500);
 	}
+
 	Kekule.X.domReady(init);
 	</script>
 </body>
