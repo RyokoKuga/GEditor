@@ -2,8 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>3D Molecular Studio Pro</title>
+<title>3D Molecular Studio Pro - V002</title>
 
+	<!-- ライブラリ群 -->
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
 	<script src="../../libs/kekule/kekule.js?modules=calculation,chemWidget,openbabel"></script>
@@ -18,7 +19,7 @@
 			--accent-blue: #1a73e8;
 			--accent-blue-hover: #1765cc;
 			--accent-red: #d93025;
-			--accent-red-hover: #b31412;
+			--accent-green: #1e8e3e;
 			--white: #ffffff;
 		}
 
@@ -40,14 +41,14 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			height: 60px;
+			height: 65px;
 			box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 			z-index: 100;
 		}
 
 		.header-left { display: flex; align-items: center; gap: 20px; }
-		.header-right { display: flex; align-items: center; gap: 12px; }
-		.logo { font-size: 18px; font-weight: 600; color: var(--app-text-main); }
+		.header-right { display: flex; align-items: center; gap: 8px; }
+		.logo { font-size: 18px; font-weight: 700; color: var(--app-text-main); letter-spacing: -0.5px; }
 
 		#state {
 			font-size: 12px;
@@ -59,64 +60,33 @@
 		}
 
 		.header-btn {
-			padding: 9px 22px;
-			border-radius: 8px;
-			font-size: 13px;
+			padding: 8px 16px;
+			border-radius: 6px;
+			font-size: 12px;
 			font-weight: 600;
 			cursor: pointer;
-			transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+			transition: all 0.2s ease;
 			border: 1px solid transparent;
 			display: inline-flex;
 			align-items: center;
-			justify-content: center;
+			gap: 6px;
 		}
 
-		/* Generate 3D ボタン (青) */
-		#ext-btn-gen {
-			background-color: var(--accent-blue);
-			color: var(--white);
-		}
-		#ext-btn-gen:hover:not(:disabled) {
-			background-color: var(--accent-blue-hover);
-			box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
-			transform: translateY(-1px);
-		}
-		#ext-btn-gen:disabled {
-			background-color: #f1f3f4;
-			color: #bdc1c6;
-			cursor: default;
-		}
+		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
+		#ext-btn-gen:hover { background: var(--accent-blue-hover); }
 
-		/* Terminate ボタン (赤 - 塗りつぶし対比デザイン) */
-		#ext-btn-terminate {
-			background-color: var(--accent-red);
-			color: var(--white);
-			border-color: var(--accent-red);
-			opacity: 1; /* 有効時は100% */
-		}
-		#ext-btn-terminate:hover:not(:disabled) {
-			background-color: var(--accent-red-hover);
-			border-color: var(--accent-red-hover);
-			box-shadow: 0 4px 12px rgba(217, 48, 37, 0.25);
-			transform: translateY(-1px);
-		}
+		#ext-btn-babel { background: var(--white); border-color: var(--app-border); color: var(--app-text-main); }
+		#ext-btn-babel:hover { background: #f1f3f4; }
+		#ext-btn-babel.active { background: #e6f4ea; color: var(--accent-green); border-color: var(--accent-green); }
 
-		/* 非アクティブ時は存在感を大幅に下げる */
-		#ext-btn-terminate:disabled {
-			background-color: transparent;
-			color: #bdc1c6;
-			border-color: #e0e2e6;
-			opacity: 0.35; /* 薄くする */
-			cursor: default;
-			box-shadow: none;
-			transform: none;
-		}
+		#ext-btn-terminate { background: var(--accent-red); color: var(--white); }
+		#ext-btn-terminate:disabled { opacity: 0.3; cursor: default; }
 
 		.app-container {
 			flex: 1;
 			display: flex;
-			flex-direction: row;
-			padding: 12px;
+			padding: 10px;
+			gap: 0;
 			min-height: 0;
 		}
 
@@ -125,78 +95,87 @@
 			flex-direction: column;
 			background: #fff;
 			border: 1px solid var(--app-border);
-			border-radius: 12px;
+			border-radius: 10px;
 			overflow: hidden;
-			box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 		}
 
 		#section-left { flex: 0 0 50%; }
 		#section-right { flex: 1; }
 
 		#resizer {
-			width: 14px;
+			width: 12px;
 			cursor: col-resize;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			transition: background 0.2s;
 		}
-		#resizer::after {
-			content: ""; width: 3px; height: 40px; background: #e0e0e0; border-radius: 3px;
-		}
-		#resizer:hover::after { background: var(--accent-blue); }
+		#resizer:hover { background: rgba(0,0,0,0.02); }
+		#resizer::after { content: ""; width: 2px; height: 30px; background: #ddd; border-radius: 2px; }
 
-		#composer, #chemViewer {
-			width: 100% !important; height: 100% !important;
-		}
-
-		/* 3Dツールバー強制表示 */
-		.K-ChemWidget-Toolbar {
-			display: flex !important;
-			opacity: 1 !important;
-			visibility: visible !important;
-			background: rgba(255, 255, 255, 0.95) !important;
-			border: 1px solid var(--app-border) !important;
-			border-radius: 10px !important;
-			margin: 12px !important;
-			box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-		}
+		#composer, #chemViewer { width: 100% !important; height: 100% !important; }
 
 		footer {
 			background: var(--app-header);
 			padding: 0 24px;
 			font-size: 11px;
-			color: #5f6368;
+			color: #70757a;
 			border-top: 1px solid var(--app-border);
-			height: 35px;
+			height: 30px;
 			display: flex;
 			align-items: center;
+			justify-content: space-between;
 		}
 	</style>
 
-	<script id="molSrc" type="chemical/x-kekule-json">
-	{"id":"m1","ctab":{"nodes":[{"__type":"Kekule.Atom","id":"a4","coord2D":{"x":0.7958,"y":0.4315},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a11","coord2D":{"x":0.0117,"y":0.1764},"charge":0,"isotopeId":"N"},{"__type":"Kekule.Atom","id":"a5","coord2D":{"x":0.7958,"y":1.2565},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a3","coord2D":{"x":1.5115,"y":0.0175},"charge":0,"isotopeId":"N"},{"__type":"Kekule.Atom","id":"a14","coord2D":{"x":0.0117,"y":-1.4648},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a7","coord2D":{"x":-0.4738,"y":0.8439},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a6","coord2D":{"x":1.5115,"y":1.6689},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a8","coord2D":{"x":0.0117,"y":1.5115},"charge":0,"isotopeId":"N"},{"__type":"Kekule.Atom","id":"a2","coord2D":{"x":2.2257,"y":0.4315},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a15","coord2D":{"x":-1.1048,"y":-1.0509},"charge":0,"isotopeId":"O"},{"__type":"Kekule.Atom","id":"a13","coord2D":{"x":-0.4095,"y":-1.9488},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a21","coord2D":{"x":0.0117,"y":-2.1732},"charge":0,"isotopeId":"H"},{"__type":"Kekule.Atom","id":"a1","coord2D":{"x":2.2257,"y":1.2565},"charge":0,"isotopeId":"N"},{"__type":"Kekule.Atom","id":"a9","coord2D":{"x":1.5115,"y":2.4939},"charge":0,"isotopeId":"O"},{"__type":"Kekule.Atom","id":"a10","coord2D":{"x":2.9428,"y":0.0175},"charge":0,"isotopeId":"N"},{"__type":"Kekule.Atom","id":"a16","coord2D":{"x":-2.2272,"y":-1.4648},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a12","coord2D":{"x":-1.7972,"y":-1.9488},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a19","coord2D":{"x":-0.4095,"y":-1.5231},"charge":0,"isotopeId":"H"},{"__type":"Kekule.Atom","id":"a17","coord2D":{"x":-0.4095,"y":-2.4939},"charge":0,"isotopeId":"H"},{"__type":"Kekule.Atom","id":"a22","coord2D":{"x":-2.2272,"y":-0.8031},"charge":0,"isotopeId":"C"},{"__type":"Kekule.Atom","id":"a23","coord2D":{"x":-2.2272,"y":-2.1732},"charge":0,"isotopeId":"H"},{"__type":"Kekule.Atom","id":"a18","coord2D":{"x":-1.7972,"y":-2.4939},"charge":0,"isotopeId":"O"},{"__type":"Kekule.Atom","id":"a20","coord2D":{"x":-1.7972,"y":-1.5231},"charge":0,"isotopeId":"H"},{"__type":"Kekule.Atom","id":"a24","coord2D":{"x":-2.9428,"y":-0.3892},"charge":0,"isotopeId":"O"}],"connectors":[{"__type":"Kekule.Bond","connectedNodes":},{"__type":"Kekule.Bond","connectedNodes":},{"__type":"Kekule.Bond","connectedNodes":},{"__type":"Kekule.Bond","connectedNodes":},{"__type":"Kekule.Bond","connectedNodes":},{"__type":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":},{"__type__":"Kekule.Bond","connectedNodes":}]},"name":"Molecule","__type":"Kekule.Molecule"}
+	<!-- 初期分子データ (Methanol 3D Molfile) -->
+	<script id="mol1" type="chemical/x-mdl-molfile">
+Untitled Document-2
+  Kekule  07101201153D
+
+  6  5  0  0  0  0  0  0  0  0999 V2000
+   -0.3586    0.0000   -0.1337 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.0564    0.0000   -0.1337 O   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6779    0.0000   -1.1978 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6779    0.9530    0.3397 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6779   -0.9530    0.3397 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.3358    0.0000    0.7858 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0
+  1  3  1  0
+  1  4  1  0
+  1  5  1  0
+  2  6  1  0
+M  END
 	</script>
 	
 	<script>
-	var composer, viewer, domBtnGen, domBtnTerminate;	
-	var calculator, timeStart, timeEnd;
+	var composer, viewer, domBtnGen, domBtnTerminate, domBtnBabel;	
+	var calculator, timeStart;
 	
 	function report(msg) { document.getElementById('state').innerHTML = msg; }
-	function getCurrMol() { return Kekule.ChemStructureUtils.getTotalStructFragment(composer.getChemObj()); }
 	
+	function enableOpenBabel() {
+		Kekule.IO.enableOpenBabelFormats();
+		domBtnBabel.classList.add('active');
+		domBtnBabel.innerHTML = '✓ OpenBabel Enabled';
+		report('OpenBabel Formats Enabled');
+	}
+
 	function generate3D() {
-		var mol = getCurrMol();
-		report('Calculating...');
+		var mol = Kekule.ChemStructureUtils.getTotalStructFragment(composer.getChemObj());
+		if (!mol) return report('Empty Molecule');
+
+		report('Calculating 3D...');
 		domBtnGen.disabled = true;
 		domBtnTerminate.disabled = false;
 		timeStart = Date.now();
-		calculator = Kekule.Calculator.generate3D(mol, {'forceField': ''},
+
+		calculator = Kekule.Calculator.generate3D(mol, {'forceField': 'MMFF94'},
 			function(generatedMol){
 				domBtnGen.disabled = false;
 				domBtnTerminate.disabled = true;
-				timeEnd = Date.now();
 				viewer.setChemObj(generatedMol);
-				report('Ready (' + (timeEnd - timeStart)/1000 + 's)');
+				report('Ready (' + ((Date.now() - timeStart)/1000).toFixed(2) + 's)');
 			},
 			function(err) {
 				domBtnGen.disabled = false;
@@ -207,10 +186,10 @@
 	}
 
 	function terminate() {
-		report('User Terminated');
+		if (calculator) calculator.halt();
+		report('Terminated');
 		domBtnGen.disabled = false;
 		domBtnTerminate.disabled = true;
-		if (calculator) calculator.halt();
 	}
 
 	function syncSizes() {
@@ -223,16 +202,18 @@
 		composer = Kekule.Widget.getWidgetById('composer');
 		domBtnGen = document.getElementById('ext-btn-gen');
 		domBtnTerminate = document.getElementById('ext-btn-terminate');
+		domBtnBabel = document.getElementById('ext-btn-babel');
 		
+		// Resizer logic
 		const resizer = document.getElementById('resizer');
 		const leftSide = document.getElementById('section-left');
 		let isResizing = false;
 
-		resizer.addEventListener('mousedown', () => { isResizing = true; document.body.style.cursor = 'col-resize'; });
+		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize'; e.preventDefault(); });
 		window.addEventListener('mousemove', (e) => {
 			if (!isResizing) return;
 			const newWidth = (e.clientX / window.innerWidth) * 100;
-			if (newWidth > 20 && newWidth < 80) {
+			if (newWidth > 15 && newWidth < 85) {
 				leftSide.style.flex = `0 0 ${newWidth}%`;
 				syncSizes();
 			}
@@ -240,7 +221,7 @@
 		window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
 
 		window.addEventListener('resize', syncSizes);
-		setTimeout(syncSizes, 300);
+		setTimeout(syncSizes, 400);
 	}
 	
 	Kekule.X.domReady(init);
@@ -250,10 +231,11 @@
 <body>
 	<header>
 		<div class="header-left">
-			<div class="logo">3D Molecular Studio Pro</div>
+			<div class="logo">Molecular Studio <span style="color:var(--accent-blue)">Pro</span></div>
 			<div id="state">Ready</div>
 		</div>
 		<div class="header-right">
+			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
 			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
 		</div>
@@ -261,17 +243,20 @@
 
 	<div class="app-container">
 		<div id="section-left" class="tool-section">
-			<div id="composer" data-widget="Kekule.Editor.Composer" data-chem-obj="url(#molSrc)" data-predefined-setting="molOnly"></div>
+			<div id="composer" data-widget="Kekule.Editor.Composer" data-chem-obj="url(#mol1)" data-predefined-setting="molOnly"></div>
 		</div>
+		
 		<div id="resizer"></div>
+		
 		<div id="section-right" class="tool-section">
 			<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" 
-				data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
+				data-toolbar-evoke-modes="[0]" data-toolbar-pos="1"></div>
 		</div>
 	</div>
 
 	<footer>
-		2026 Edition Pro. Draw molecules on the left, click "Generate 3D" to calculate.
+		<div>Version 0.0.2 (2026 Edition)</div>
+		<div>Powered by Kekule.js & OpenBabel WebAssembly</div>
 	</footer>
 </body>
 </html>
