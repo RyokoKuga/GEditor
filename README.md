@@ -1,6 +1,6 @@
 # 🧪 GfEditer - Dual Mode Molecular Editer
 
-
+README in [Japanese](https://github.com/RyokoKuga/GfEditor/blob/main/README-ja.md)
 
 **GfEditer** is a high-performance web-based tool designed to bridge the gap between **molecular structural modeling** and **GAMESS** input file (`.inp`) generation.
 
