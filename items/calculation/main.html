@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>GfEditer - 3D Molecular Studio</title>
+<title>GfEditer - 3D Molecular Studio with GAMESS Configurator</title>
 
 	<!-- ライブラリ群 -->
 	<script src="../../libs/Three.js"></script>
@@ -19,9 +19,9 @@
 			--accent-blue: #1a73e8;
 			--accent-blue-hover: #1765cc;
 			--accent-red: #d93025;
-			--accent-green: #1e8e3e;
 			--accent-orange: #f29900;
 			--white: #ffffff;
+			--panel-bg: #fdfdfd;
 		}
 
 		body {
@@ -43,183 +43,112 @@
 			justify-content: space-between;
 			align-items: center;
 			height: 65px;
-			box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 			z-index: 100;
 		}
 
 		.header-left { display: flex; align-items: center; gap: 20px; }
 		.header-right { display: flex; align-items: center; gap: 8px; }
-		
-		.logo { font-size: 20px; font-weight: 700; color: var(--app-text-main); letter-spacing: -0.5px; }
+		.logo { font-size: 20px; font-weight: 700; color: var(--app-text-main); }
 		.logo span.g-accent { color: var(--accent-blue); }
 
-		#state {
-			font-size: 12px;
-			color: #174ea6;
-			background: #e8f0fe;
-			padding: 5px 15px;
-			border-radius: 20px;
-			font-weight: 500;
-		}
+		#state { font-size: 12px; color: #174ea6; background: #e8f0fe; padding: 5px 15px; border-radius: 20px; }
 
 		.header-btn {
-			padding: 8px 16px;
-			border-radius: 6px;
-			font-size: 12px;
-			font-weight: 600;
-			cursor: pointer;
-			transition: all 0.2s ease;
-			border: 1px solid transparent;
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
+			padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
+			cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
+			display: inline-flex; align-items: center; gap: 6px;
 		}
-
 		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
-		#ext-btn-gen:hover { background: var(--accent-blue-hover); }
+		#ext-btn-gamess { background: var(--accent-orange); color: var(--white); }
 
-		#ext-btn-gamess { background: var(--white); border-color: var(--accent-orange); color: var(--accent-orange); }
-		#ext-btn-gamess:hover { background: #fffcf5; }
+		.app-container { flex: 1; display: flex; padding: 10px; min-height: 0; }
 
-		#ext-btn-babel { background: var(--white); border-color: var(--app-border); color: var(--app-text-main); }
-		#ext-btn-babel:hover { background: #f1f3f4; }
-		#ext-btn-babel.active { background: #e6f4ea; color: var(--accent-green); border-color: var(--accent-green); }
-
-		#ext-btn-terminate { background: var(--accent-red); color: var(--white); }
-		#ext-btn-terminate:disabled { opacity: 0.3; cursor: default; }
-
-		.app-container {
-			flex: 1;
-			display: flex;
-			padding: 10px;
-			min-height: 0;
-		}
-
-		.tool-section {
-			display: flex;
-			flex-direction: column;
-			background: #fff;
-			border: 1px solid var(--app-border);
-			border-radius: 10px;
-			overflow: hidden;
-		}
-
+		.tool-section { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--app-border); border-radius: 10px; overflow: hidden; }
 		#section-left { flex: 0 0 50%; }
-		#section-right { flex: 1; }
+		#section-right { flex: 1; display: flex; flex-direction: column; }
 
-		#resizer {
-			width: 12px;
-			cursor: col-resize;
-			display: flex;
-			align-items: center;
-			justify-content: center;
+		#viewer-container { flex: 1; position: relative; border-bottom: 1px solid var(--app-border); }
+
+		/* GAMESS 設定パネル */
+		#gamess-panel {
+			height: 220px;
+			background: var(--panel-bg);
+			padding: 15px;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 12px;
+			overflow-y: auto;
 		}
-		#resizer::after { content: ""; width: 2px; height: 30px; background: #ddd; border-radius: 2px; }
 
-		#composer, #chemViewer { width: 100% !important; height: 100% !important; }
-
-		footer {
-			background: var(--app-header);
-			padding: 0 24px;
-			font-size: 11px;
-			color: #70757a;
-			border-top: 1px solid var(--app-border);
-			height: 30px;
-			display: flex;
-			align-items: center;
-			justify-content: flex-end; 
+		.config-group { display: flex; flex-direction: column; gap: 5px; }
+		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; text-transform: uppercase; }
+		.config-group select {
+			padding: 6px; border-radius: 4px; border: 1px solid var(--app-border);
+			font-size: 12px; background: white; outline: none;
 		}
+
+		#resizer { width: 12px; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
+		#resizer::after { content: ""; width: 2px; height: 30px; background: #ddd; }
+
+		footer { background: var(--app-header); padding: 0 24px; font-size: 11px; color: #70757a; border-top: 1px solid var(--app-border); height: 30px; display: flex; align-items: center; justify-content: flex-end; }
 	</style>
 	
 	<script>
-	var composer, viewer, domBtnGen, domBtnTerminate, domBtnBabel;	
+	var composer, viewer, domBtnGen;
 	var calculator, timeStart;
 	
 	function report(msg) { document.getElementById('state').innerHTML = msg; }
-	
-	function enableOpenBabel() {
-		Kekule.IO.enableOpenBabelFormats();
-		domBtnBabel.classList.add('active');
-		domBtnBabel.innerHTML = '✓ OpenBabel Enabled';
-		report('OpenBabel Formats Enabled');
-	}
 
-	// GAMESS 入力ファイルの作成とダウンロード
 	function exportGamess() {
-		var mol = viewer.getChemObj(); // 3Dビューアの現在の分子を取得
-		if (!mol || mol.getNodeCount() === 0) {
-			return report('No 3D structure to export');
-		}
+		var mol = viewer.getChemObj();
+		if (!mol || mol.getNodeCount() === 0) return report('No 3D structure to export');
+
+		// フォーム値の取得
+		var scf = document.getElementById('cfg-scf').value;
+		var run = document.getElementById('cfg-run').value;
+		var basis = document.getElementById('cfg-basis').value;
+		var charge = document.getElementById('cfg-charge').value;
+		var mult = document.getElementById('cfg-mult').value;
 
 		var lines = [];
-		lines.push(' $CONTRL SCFTYP=RHF RUNTYP=OPTIMIZE COORD=UNIQUE $END');
-		lines.push(' $BASIS  GBASIS=N31 NGAUSS=6 $END');
+		lines.push(` $CONTRL SCFTYP=${scf} RUNTYP=${run} MULT=${mult} ICHG=${charge} COORD=UNIQUE $END`);
+		lines.push(` $BASIS  GBASIS=${basis} $END`);
 		lines.push(' $GUESS  GUESS=HCORE $END');
 		lines.push(' $DATA');
-		lines.push('GAMESS Input generated by GfEditer');
-		lines.push('C1'); // 対称性
+		lines.push('GAMESS Input generated by GfEditer (2026)');
+		lines.push('C1');
 
-		// 原子座標の抽出
 		for (var i = 0; i < mol.getNodeCount(); ++i) {
 			var node = mol.getNodeAt(i);
 			if (node instanceof Kekule.Atom) {
-				var symbol = node.getSymbol();
-				var atomicNum = node.getAtomicNumber();
 				var coord = node.getAbsCoord3D() || node.getCoord3D();
-				
-				// 形式: 原子名 原子番号 X Y Z
-				var line = ' ' + symbol.padEnd(5) + 
-						   atomicNum.toString().padStart(5) + '.0' +
-						   coord.x.toFixed(10).padStart(15) + 
-						   coord.y.toFixed(10).padStart(15) + 
-						   coord.z.toFixed(10).padStart(15);
-				lines.push(line);
+				lines.push(` ${node.getSymbol().padEnd(5)} ${node.getAtomicNumber().toString().padStart(5)}.0 ${coord.x.toFixed(8).padStart(14)} ${coord.y.toFixed(8).padStart(14)} ${coord.z.toFixed(8).padStart(14)}`);
 			}
 		}
 		lines.push(' $END');
 
-		var content = lines.join('\n');
-		
-		// ダウンロード処理
-		var blob = new Blob([content], { type: 'text/plain' });
-		var url = URL.createObjectURL(blob);
+		var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
 		var a = document.createElement('a');
-		a.href = url;
-		a.download = 'molecule.inp';
+		a.href = URL.createObjectURL(blob);
+		a.download = 'gamess_input.inp';
 		a.click();
-		URL.revokeObjectURL(url);
-		report('GAMESS .inp exported');
+		report('GAMESS .inp ready');
 	}
 
 	function generate3D() {
 		var mol = Kekule.ChemStructureUtils.getTotalStructFragment(composer.getChemObj());
 		if (!mol || mol.getNodeCount() === 0) return report('Canvas is empty');
-
 		report('Calculating 3D...');
 		domBtnGen.disabled = true;
-		domBtnTerminate.disabled = false;
 		timeStart = Date.now();
-
 		calculator = Kekule.Calculator.generate3D(mol, {'forceField': 'MMFF94'},
 			function(generatedMol){
 				domBtnGen.disabled = false;
-				domBtnTerminate.disabled = true;
 				viewer.setChemObj(generatedMol);
 				report('Ready (' + ((Date.now() - timeStart)/1000).toFixed(2) + 's)');
 			},
-			function(err) {
-				domBtnGen.disabled = false;
-				domBtnTerminate.disabled = true;
-				report('Ready');
-			}
+			function() { domBtnGen.disabled = false; report('Ready'); }
 		);
-	}
-
-	function terminate() {
-		if (calculator) calculator.halt();
-		report('Terminated');
-		domBtnGen.disabled = false;
-		domBtnTerminate.disabled = true;
 	}
 
 	function syncSizes() {
@@ -231,13 +160,10 @@
 		viewer = Kekule.Widget.getWidgetById('chemViewer');
 		composer = Kekule.Widget.getWidgetById('composer');
 		domBtnGen = document.getElementById('ext-btn-gen');
-		domBtnTerminate = document.getElementById('ext-btn-terminate');
-		domBtnBabel = document.getElementById('ext-btn-babel');
 		
 		const resizer = document.getElementById('resizer');
 		const leftSide = document.getElementById('section-left');
 		let isResizing = false;
-
 		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize'; e.preventDefault(); });
 		window.addEventListener('mousemove', (e) => {
 			if (!isResizing) return;
@@ -248,11 +174,9 @@
 			}
 		});
 		window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
-
 		window.addEventListener('resize', syncSizes);
 		setTimeout(syncSizes, 400);
 	}
-	
 	Kekule.X.domReady(init);
 	</script>
 </head>
@@ -264,11 +188,8 @@
 			<div id="state">Ready</div>
 		</div>
 		<div class="header-right">
-			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
-			<!-- GAMESS出力ボタンを追加 -->
-			<button id="ext-btn-gamess" class="header-btn" onclick="exportGamess()">Export GAMESS</button>
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
-			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
+			<button id="ext-btn-gamess" class="header-btn" onclick="exportGamess()">Export GAMESS (.inp)</button>
 		</div>
 	</header>
 
@@ -280,8 +201,61 @@
 		<div id="resizer"></div>
 		
 		<div id="section-right" class="tool-section">
-			<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" 
-				data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
+			<!-- 上部: 3Dビューア -->
+			<div id="viewer-container">
+				<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
+			</div>
+			
+			<!-- 下部: Avogadro風 GAMESS設定パネル -->
+			<div id="gamess-panel">
+				<div class="config-group">
+					<label>Theory (SCFTYP)</label>
+					<select id="cfg-scf">
+						<option value="RHF">RHF (Restricted)</option>
+						<option value="UHF">UHF (Unrestricted)</option>
+						<option value="ROHF">ROHF</option>
+						<option value="GVB">GVB</option>
+						<option value="MCSCF">MCSCF</option>
+					</select>
+				</div>
+				<div class="config-group">
+					<label>Run Type</label>
+					<select id="cfg-run">
+						<option value="OPTIMIZE">Geometry Optimization</option>
+						<option value="ENERGY">Single Point Energy</option>
+						<option value="HESSIAN">Vibrational Analysis</option>
+						<option value="SADPOINT">Saddle Point Search</option>
+					</select>
+				</div>
+				<div class="config-group">
+					<label>Basis Set</label>
+					<select id="cfg-basis">
+						<option value="N31">6-31G</option>
+						<option value="STO">STO-3G</option>
+						<option value="N21">3-21G</option>
+						<option value="CCD">cc-pVDZ</option>
+					</select>
+				</div>
+				<div class="config-group">
+					<label>Charge (ICHG)</label>
+					<select id="cfg-charge">
+						<option value="0">0 (Neutral)</option>
+						<option value="1">+1</option>
+						<option value="-1">-1</option>
+						<option value="2">+2</option>
+						<option value="-2">-2</option>
+					</select>
+				</div>
+				<div class="config-group">
+					<label>Multiplicity</label>
+					<select id="cfg-mult">
+						<option value="1">1 (Singlet)</option>
+						<option value="2">2 (Doublet)</option>
+						<option value="3">3 (Triplet)</option>
+						<option value="4">4 (Quartet)</option>
+					</select>
+				</div>
+			</div>
 		</div>
 	</div>
 
