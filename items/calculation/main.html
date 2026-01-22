@@ -2,9 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>GfEditer - 3D Molecular Studio with GAMESS Configurator</title>
+<title>GfEditer - 3D Molecular Studio with GAMESS Editor</title>
 
-	<!-- ライブラリ群 -->
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
 	<script src="../../libs/kekule/kekule.js?modules=calculation,chemWidget,openbabel"></script>
@@ -19,9 +18,9 @@
 			--accent-blue: #1a73e8;
 			--accent-blue-hover: #1765cc;
 			--accent-red: #d93025;
+			--accent-green: #1e8e3e;
 			--accent-orange: #f29900;
 			--white: #ffffff;
-			--panel-bg: #fdfdfd;
 		}
 
 		body {
@@ -42,49 +41,61 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			height: 65px;
+			height: 60px;
 			z-index: 100;
 		}
 
 		.header-left { display: flex; align-items: center; gap: 20px; }
 		.header-right { display: flex; align-items: center; gap: 8px; }
-		.logo { font-size: 20px; font-weight: 700; color: var(--app-text-main); }
+		.logo { font-size: 20px; font-weight: 700; }
 		.logo span.g-accent { color: var(--accent-blue); }
 
 		#state { font-size: 12px; color: #174ea6; background: #e8f0fe; padding: 5px 15px; border-radius: 20px; }
 
 		.header-btn {
-			padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600;
-			cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
-			display: inline-flex; align-items: center; gap: 6px;
+			padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+			cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+			display: inline-flex; align-items: center; gap: 5px;
 		}
 		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
-		#ext-btn-gamess { background: var(--accent-orange); color: var(--white); }
+		#ext-btn-terminate { background: var(--accent-red); color: var(--white); }
+		#ext-btn-terminate:disabled { opacity: 0.3; cursor: default; }
+		#ext-btn-babel { background: white; border-color: var(--app-border); }
+		#ext-btn-babel.active { background: #e6f4ea; color: var(--accent-green); border-color: var(--accent-green); }
+		#ext-btn-download { background: var(--accent-orange); color: var(--white); }
 
-		.app-container { flex: 1; display: flex; padding: 10px; min-height: 0; }
-
-		.tool-section { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--app-border); border-radius: 10px; overflow: hidden; }
-		#section-left { flex: 0 0 50%; }
-		#section-right { flex: 1; display: flex; flex-direction: column; }
-
-		#viewer-container { flex: 1; position: relative; border-bottom: 1px solid var(--app-border); }
-
-		/* GAMESS 設定パネル */
-		#gamess-panel {
-			height: 220px;
-			background: var(--panel-bg);
-			padding: 15px;
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 12px;
-			overflow-y: auto;
+		.app-container {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			padding: 10px;
+			gap: 10px;
+			min-height: 0;
 		}
 
+		/* 上部メインエリア */
+		.main-row { flex: 0 0 60%; display: flex; gap: 0; min-height: 0; }
+		/* 下部エディタエリア */
+		.editor-row { flex: 1; display: flex; gap: 0; min-height: 0; border-top: 1px solid var(--app-border); padding-top: 10px; }
+
+		.tool-section { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--app-border); border-radius: 10px; overflow: hidden; }
+		
+		#section-left-top { flex: 0 0 50%; }
+		#section-right-top { flex: 1; }
+		
+		#section-left-bottom { flex: 0 0 50%; background: #fdfdfd; padding: 15px; overflow-y: auto; }
+		#section-right-bottom { flex: 1; position: relative; }
+
+		.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 		.config-group { display: flex; flex-direction: column; gap: 5px; }
-		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; text-transform: uppercase; }
-		.config-group select {
-			padding: 6px; border-radius: 4px; border: 1px solid var(--app-border);
-			font-size: 12px; background: white; outline: none;
+		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; }
+		.config-group select { padding: 6px; border-radius: 4px; border: 1px solid var(--app-border); font-size: 12px; }
+
+		#gamess-editor {
+			width: 100%; height: 100%; border: none; padding: 15px;
+			box-sizing: border-box; font-family: 'Courier New', monospace;
+			font-size: 13px; line-height: 1.5; resize: none; outline: none;
+			background: #202124; color: #e8eaed;
 		}
 
 		#resizer { width: 12px; cursor: col-resize; display: flex; align-items: center; justify-content: center; }
@@ -92,93 +103,6 @@
 
 		footer { background: var(--app-header); padding: 0 24px; font-size: 11px; color: #70757a; border-top: 1px solid var(--app-border); height: 30px; display: flex; align-items: center; justify-content: flex-end; }
 	</style>
-	
-	<script>
-	var composer, viewer, domBtnGen;
-	var calculator, timeStart;
-	
-	function report(msg) { document.getElementById('state').innerHTML = msg; }
-
-	function exportGamess() {
-		var mol = viewer.getChemObj();
-		if (!mol || mol.getNodeCount() === 0) return report('No 3D structure to export');
-
-		// フォーム値の取得
-		var scf = document.getElementById('cfg-scf').value;
-		var run = document.getElementById('cfg-run').value;
-		var basis = document.getElementById('cfg-basis').value;
-		var charge = document.getElementById('cfg-charge').value;
-		var mult = document.getElementById('cfg-mult').value;
-
-		var lines = [];
-		lines.push(` $CONTRL SCFTYP=${scf} RUNTYP=${run} MULT=${mult} ICHG=${charge} COORD=UNIQUE $END`);
-		lines.push(` $BASIS  GBASIS=${basis} $END`);
-		lines.push(' $GUESS  GUESS=HCORE $END');
-		lines.push(' $DATA');
-		lines.push('GAMESS Input generated by GfEditer (2026)');
-		lines.push('C1');
-
-		for (var i = 0; i < mol.getNodeCount(); ++i) {
-			var node = mol.getNodeAt(i);
-			if (node instanceof Kekule.Atom) {
-				var coord = node.getAbsCoord3D() || node.getCoord3D();
-				lines.push(` ${node.getSymbol().padEnd(5)} ${node.getAtomicNumber().toString().padStart(5)}.0 ${coord.x.toFixed(8).padStart(14)} ${coord.y.toFixed(8).padStart(14)} ${coord.z.toFixed(8).padStart(14)}`);
-			}
-		}
-		lines.push(' $END');
-
-		var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-		var a = document.createElement('a');
-		a.href = URL.createObjectURL(blob);
-		a.download = 'gamess_input.inp';
-		a.click();
-		report('GAMESS .inp ready');
-	}
-
-	function generate3D() {
-		var mol = Kekule.ChemStructureUtils.getTotalStructFragment(composer.getChemObj());
-		if (!mol || mol.getNodeCount() === 0) return report('Canvas is empty');
-		report('Calculating 3D...');
-		domBtnGen.disabled = true;
-		timeStart = Date.now();
-		calculator = Kekule.Calculator.generate3D(mol, {'forceField': 'MMFF94'},
-			function(generatedMol){
-				domBtnGen.disabled = false;
-				viewer.setChemObj(generatedMol);
-				report('Ready (' + ((Date.now() - timeStart)/1000).toFixed(2) + 's)');
-			},
-			function() { domBtnGen.disabled = false; report('Ready'); }
-		);
-	}
-
-	function syncSizes() {
-		if (composer) composer.notifyObjectSizeChanged();
-		if (viewer) viewer.notifyObjectSizeChanged();
-	}
-	
-	function init() {
-		viewer = Kekule.Widget.getWidgetById('chemViewer');
-		composer = Kekule.Widget.getWidgetById('composer');
-		domBtnGen = document.getElementById('ext-btn-gen');
-		
-		const resizer = document.getElementById('resizer');
-		const leftSide = document.getElementById('section-left');
-		let isResizing = false;
-		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize'; e.preventDefault(); });
-		window.addEventListener('mousemove', (e) => {
-			if (!isResizing) return;
-			const newWidth = (e.clientX / window.innerWidth) * 100;
-			if (newWidth > 15 && newWidth < 85) {
-				leftSide.style.flex = `0 0 ${newWidth}%`;
-				syncSizes();
-			}
-		});
-		window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default'; });
-		window.addEventListener('resize', syncSizes);
-		setTimeout(syncSizes, 400);
-	}
-	Kekule.X.domReady(init);
-	</script>
 </head>
 
 <body>
@@ -188,79 +112,162 @@
 			<div id="state">Ready</div>
 		</div>
 		<div class="header-right">
+			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
-			<button id="ext-btn-gamess" class="header-btn" onclick="exportGamess()">Export GAMESS (.inp)</button>
+			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
+			<button id="ext-btn-download" class="header-btn" onclick="downloadInp()">Download .inp</button>
 		</div>
 	</header>
 
 	<div class="app-container">
-		<div id="section-left" class="tool-section">
-			<div id="composer" data-widget="Kekule.Editor.Composer" data-predefined-setting="molOnly"></div>
-		</div>
-		
-		<div id="resizer"></div>
-		
-		<div id="section-right" class="tool-section">
-			<!-- 上部: 3Dビューア -->
-			<div id="viewer-container">
+		<!-- 上段: 2D描画 & 3D表示 -->
+		<div class="main-row">
+			<div id="section-left-top" class="tool-section">
+				<div id="composer" data-widget="Kekule.Editor.Composer" data-predefined-setting="molOnly"></div>
+			</div>
+			<div id="resizer"></div>
+			<div id="section-right-top" class="tool-section">
 				<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
 			</div>
-			
-			<!-- 下部: Avogadro風 GAMESS設定パネル -->
-			<div id="gamess-panel">
-				<div class="config-group">
-					<label>Theory (SCFTYP)</label>
-					<select id="cfg-scf">
-						<option value="RHF">RHF (Restricted)</option>
-						<option value="UHF">UHF (Unrestricted)</option>
-						<option value="ROHF">ROHF</option>
-						<option value="GVB">GVB</option>
-						<option value="MCSCF">MCSCF</option>
-					</select>
+		</div>
+
+		<!-- 下段: 設定パネル & リアルタイムエディタ -->
+		<div class="editor-row">
+			<div id="section-left-bottom" class="tool-section">
+				<div class="config-grid">
+					<div class="config-group"><label>Theory (SCFTYP)</label>
+						<select id="cfg-scf" onchange="updateGamessText()"><option value="RHF">RHF</option><option value="UHF">UHF</option><option value="ROHF">ROHF</option></select>
+					</div>
+					<div class="config-group"><label>Run Type</label>
+						<select id="cfg-run" onchange="updateGamessText()"><option value="OPTIMIZE">OPTIMIZE</option><option value="ENERGY">ENERGY</option><option value="HESSIAN">HESSIAN</option></select>
+					</div>
+					<div class="config-group"><label>Basis Set</label>
+						<select id="cfg-basis" onchange="updateGamessText()"><option value="N31">6-31G</option><option value="STO">STO-3G</option><option value="N21">3-21G</option></select>
+					</div>
+					<div class="config-group"><label>Charge</label>
+						<select id="cfg-charge" onchange="updateGamessText()"><option value="0">0</option><option value="1">+1</option><option value="-1">-1</option></select>
+					</div>
 				</div>
-				<div class="config-group">
-					<label>Run Type</label>
-					<select id="cfg-run">
-						<option value="OPTIMIZE">Geometry Optimization</option>
-						<option value="ENERGY">Single Point Energy</option>
-						<option value="HESSIAN">Vibrational Analysis</option>
-						<option value="SADPOINT">Saddle Point Search</option>
-					</select>
-				</div>
-				<div class="config-group">
-					<label>Basis Set</label>
-					<select id="cfg-basis">
-						<option value="N31">6-31G</option>
-						<option value="STO">STO-3G</option>
-						<option value="N21">3-21G</option>
-						<option value="CCD">cc-pVDZ</option>
-					</select>
-				</div>
-				<div class="config-group">
-					<label>Charge (ICHG)</label>
-					<select id="cfg-charge">
-						<option value="0">0 (Neutral)</option>
-						<option value="1">+1</option>
-						<option value="-1">-1</option>
-						<option value="2">+2</option>
-						<option value="-2">-2</option>
-					</select>
-				</div>
-				<div class="config-group">
-					<label>Multiplicity</label>
-					<select id="cfg-mult">
-						<option value="1">1 (Singlet)</option>
-						<option value="2">2 (Doublet)</option>
-						<option value="3">3 (Triplet)</option>
-						<option value="4">4 (Quartet)</option>
-					</select>
-				</div>
+			</div>
+			<div id="resizer-bottom" style="width:12px;"></div>
+			<div id="section-right-bottom" class="tool-section">
+				<textarea id="gamess-editor" spellcheck="false"></textarea>
 			</div>
 		</div>
 	</div>
 
-	<footer>
-		<div>Powered by Kekule.js</div>
-	</footer>
+	<footer><div>Powered by Kekule.js</div></footer>
+
+	<script>
+	var composer, viewer, domBtnGen, domBtnTerminate, domBtnBabel;
+	var calculator, timeStart;
+
+	function report(msg) { document.getElementById('state').innerHTML = msg; }
+
+	function enableOpenBabel() {
+		Kekule.IO.enableOpenBabelFormats();
+		domBtnBabel.classList.add('active');
+		domBtnBabel.innerHTML = '✓ OpenBabel Enabled';
+		report('OpenBabel Enabled');
+	}
+
+	function updateGamessText() {
+		var mol = viewer.getChemObj();
+		if (!mol || mol.getNodeCount() === 0) {
+			document.getElementById('gamess-editor').value = "! 3D構造を生成するとここに反映されます";
+			return;
+		}
+
+		var scf = document.getElementById('cfg-scf').value;
+		var run = document.getElementById('cfg-run').value;
+		var basis = document.getElementById('cfg-basis').value;
+		var charge = document.getElementById('cfg-charge').value;
+
+		var lines = [];
+		lines.push(` $CONTRL SCFTYP=${scf} RUNTYP=${run} ICHG=${charge} COORD=UNIQUE $END`);
+		lines.push(` $BASIS  GBASIS=${basis} $END`);
+		lines.push(' $DATA\nGenerated by GfEditer\nC1');
+
+		for (var i = 0; i < mol.getNodeCount(); ++i) {
+			var node = mol.getNodeAt(i);
+			if (node instanceof Kekule.Atom) {
+				var coord = node.getAbsCoord3D() || node.getCoord3D();
+				lines.push(` ${node.getSymbol().padEnd(5)} ${node.getAtomicNumber().toString().padStart(5)}.0 ${coord.x.toFixed(8).padStart(14)} ${coord.y.toFixed(8).padStart(14)} ${coord.z.toFixed(8).padStart(14)}`);
+			}
+		}
+		lines.push(' $END');
+		document.getElementById('gamess-editor').value = lines.join('\n');
+	}
+
+	function generate3D() {
+		var mol = Kekule.ChemStructureUtils.getTotalStructFragment(composer.getChemObj());
+		if (!mol || mol.getNodeCount() === 0) return report('Canvas is empty');
+		report('Calculating 3D...');
+		domBtnGen.disabled = true;
+		domBtnTerminate.disabled = false;
+		timeStart = Date.now();
+		calculator = Kekule.Calculator.generate3D(mol, {'forceField': 'MMFF94'},
+			function(generatedMol){
+				domBtnGen.disabled = false;
+				domBtnTerminate.disabled = true;
+				viewer.setChemObj(generatedMol);
+				updateGamessText();
+				report('Ready (' + ((Date.now() - timeStart)/1000).toFixed(2) + 's)');
+			},
+			function() { domBtnGen.disabled = false; domBtnTerminate.disabled = true; report('Ready'); }
+		);
+	}
+
+	function terminate() {
+		if (calculator) calculator.halt();
+		domBtnGen.disabled = false;
+		domBtnTerminate.disabled = true;
+		report('Terminated');
+	}
+
+	function downloadInp() {
+		var content = document.getElementById('gamess-editor').value;
+		var blob = new Blob([content], { type: 'text/plain' });
+		var a = document.createElement('a');
+		a.href = URL.createObjectURL(blob);
+		a.download = 'gamess_input.inp';
+		a.click();
+	}
+
+	function syncSizes() {
+		if (composer) composer.notifyObjectSizeChanged();
+		if (viewer) viewer.notifyObjectSizeChanged();
+	}
+
+	function init() {
+		viewer = Kekule.Widget.getWidgetById('chemViewer');
+		composer = Kekule.Widget.getWidgetById('composer');
+		domBtnGen = document.getElementById('ext-btn-gen');
+		domBtnTerminate = document.getElementById('ext-btn-terminate');
+		domBtnBabel = document.getElementById('ext-btn-babel');
+
+		// 左右リサイズ (上段)
+		const resizer = document.getElementById('resizer');
+		const leftSide = document.getElementById('section-left-top');
+		const leftSideBottom = document.getElementById('section-left-bottom');
+		let isResizing = false;
+
+		resizer.addEventListener('mousedown', (e) => { isResizing = true; e.preventDefault(); });
+		window.addEventListener('mousemove', (e) => {
+			if (!isResizing) return;
+			const newWidth = (e.clientX / window.innerWidth) * 100;
+			if (newWidth > 15 && newWidth < 85) {
+				leftSide.style.flex = `0 0 ${newWidth}%`;
+				leftSideBottom.style.flex = `0 0 ${newWidth}%`; // 上下連動
+				syncSizes();
+			}
+		});
+		window.addEventListener('mouseup', () => { isResizing = false; });
+		window.addEventListener('resize', syncSizes);
+		setTimeout(syncSizes, 400);
+		updateGamessText();
+	}
+	Kekule.X.domReady(init);
+	</script>
 </body>
 </html>
