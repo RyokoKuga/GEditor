@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>GfEditer - Dual Mode Molecular Studio (Version 023)</title>
+<title>GfEditer - Dual Mode Molecular Studio (Version 026)</title>
 
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
@@ -115,7 +115,7 @@
 	<header>
 		<div style="display:flex; align-items:center;">
 			<div class="logo"><span style="color:var(--accent-blue)">G</span>fEditer</div>
-			<div id="state">Editor Mode</div>
+			<div id="state">Modeling Mode</div>
 		</div>
 		<div class="header-right">
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
@@ -142,15 +142,7 @@
 			<div id="gamess-config" class="tool-pane col-left">
 				<h2 style="margin-top:0; font-size:18px; color:var(--accent-blue);">GAMESS Configuration</h2>
 				<div class="config-grid">
-					<div class="config-group">
-						<label>Theory</label>
-						<select id="cfg-theory" onchange="updateGamessText()">
-							<option value="RHF">RHF</option>
-							<option value="UHF">UHF</option>
-							<option value="DFT TYP=B3LYP">B3LYP (DFT)</option>
-							<option value="MP2">MP2</option>
-						</select>
-					</div>
+					<!-- Run Type を先に配置 -->
 					<div class="config-group">
 						<label>Run Type</label>
 						<select id="cfg-run" onchange="updateGamessText()">
@@ -158,6 +150,16 @@
 							<option value="ENERGY">ENERGY</option>
 							<option value="HESSIAN">HESSIAN</option>
 							<option value="SADPOINT">SADPOINT</option>
+						</select>
+					</div>
+					<!-- Theory を後に配置 -->
+					<div class="config-group">
+						<label>Theory</label>
+						<select id="cfg-theory" onchange="updateGamessText()">
+							<option value="RHF">RHF</option>
+							<option value="UHF">UHF</option>
+							<option value="DFT TYP=B3LYP">B3LYP (DFT)</option>
+							<option value="MP2">MP2</option>
 						</select>
 					</div>
 					<div class="config-group">
@@ -245,12 +247,11 @@
 		var charge = document.getElementById('cfg-charge').value;
 		var mult = document.getElementById('cfg-mult').value;
 
-		// TheoryがB3LYPの場合は $CONTRL への書き込み方を調整
 		var scftyp = (theoryVal.includes('B3LYP') || theoryVal === 'MP2') ? 'RHF' : theoryVal;
-		if (mult > 1 && scftyp === 'RHF') scftyp = 'ROHF'; // 閉殻でない場合の補正
+		if (mult > 1 && scftyp === 'RHF') scftyp = 'ROHF'; 
 
 		var lines = [];
-		var contrlLine = ` $CONTRL SCFTYP=${scftyp} RUNTYP=${run} ICHG=${charge} MULT=${mult} COORD=UNIQUE`;
+		var contrlLine = ` $CONTRL SCFTYP=${scftyp} RUNTYP=${run} ICHARG=${charge} MULT=${mult} COORD=UNIQUE`;
 		if (theoryVal.includes('B3LYP')) contrlLine += ` DFTTYP=B3LYP`;
 		if (theoryVal === 'MP2') contrlLine += ` MPLEVL=2`;
 		contrlLine += ` $END`;
