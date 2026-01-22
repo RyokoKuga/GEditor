@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>GfEditer - 3D Molecular Studio (Version 016)</title>
+<title>GfEditer - 4-Pane Molecular Studio (Version 017)</title>
 
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
@@ -16,7 +16,6 @@
 			--app-border: #e0e2e6;
 			--app-text-main: #202124;
 			--accent-blue: #1a73e8;
-			--accent-blue-hover: #1765cc;
 			--accent-red: #d93025;
 			--accent-green: #1e8e3e;
 			--accent-orange: #f29900;
@@ -26,7 +25,7 @@
 		body {
 			background-color: var(--app-bg);
 			color: var(--app-text-main);
-			font-family: 'Inter', -apple-system, sans-serif;
+			font-family: 'Inter', sans-serif;
 			margin: 0;
 			display: flex;
 			flex-direction: column;
@@ -43,7 +42,6 @@
 			align-items: center;
 			height: 60px;
 			flex-shrink: 0;
-			z-index: 100;
 		}
 
 		.logo { font-size: 20px; font-weight: 700; }
@@ -59,64 +57,65 @@
 		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
 		#ext-btn-terminate { background: var(--accent-red); color: var(--white); }
 		#ext-btn-terminate:disabled { opacity: 0.3; cursor: default; }
-		#ext-btn-babel { background: white; border-color: var(--app-border); color: var(--app-text-main); }
+		#ext-btn-babel { background: white; border-color: var(--app-border); }
 		#ext-btn-babel.active { background: #e6f4ea; color: var(--accent-green); border-color: var(--accent-green); }
-		#ext-btn-goto { background: #3c4043; color: var(--white); }
 
 		.app-container {
 			flex: 1;
-			overflow-y: scroll;
-			scroll-behavior: smooth;
 			display: flex;
 			flex-direction: column;
+			padding: 10px;
+			gap: 10px;
+			min-height: 0;
 		}
 
-		.view-section {
-			display: flex;
-			width: 100%;
-			height: 90vh; 
-			flex-shrink: 0;
-			position: relative;
-			border-bottom: 2px solid var(--app-border);
-		}
+		/* 4分割の行設定 */
+		.pane-row { display: flex; gap: 0; min-height: 0; }
+		#row-top { flex: 3; }    /* 上段（2D/3D）を広めに */
+		#row-bottom { flex: 2; } /* 下段（GAMESS） */
 
-		.editor-section {
+		.tool-pane {
 			display: flex;
-			width: 100%;
-			height: 600px;
-			flex-shrink: 0;
+			flex-direction: column;
 			background: #fff;
+			border: 1px solid var(--app-border);
+			border-radius: 10px;
+			overflow: hidden;
 		}
 
-		.tool-column { display: flex; flex-direction: column; overflow: hidden; }
-		.col-left { flex: 0 0 50%; }
+		.col-left { flex: 0 0 50%; } /* JSで幅を制御 */
 		.col-right { flex: 1; position: relative; }
 
 		#composer, #chemViewer { width: 100% !important; height: 100% !important; }
 
-		#section-left-bottom { padding: 40px; background: #fdfdfd; border-right: 1px solid var(--app-border); }
-		.config-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 350px; }
-		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; text-transform: uppercase; }
-		.config-group select { padding: 10px; border-radius: 6px; border: 1px solid var(--app-border); font-size: 14px; width: 100%; }
+		/* 下段設定パネル */
+		#section-config { padding: 20px; background: #fdfdfd; overflow-y: auto; }
+		.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+		.config-group { display: flex; flex-direction: column; gap: 5px; }
+		.config-group label { font-size: 11px; font-weight: 700; color: #5f6368; }
+		.config-group select { padding: 6px; border-radius: 4px; border: 1px solid var(--app-border); font-size: 12px; }
 
-		#section-right-bottom { display: flex; flex-direction: column; }
+		/* 下段エディタ */
+		#section-editor { position: relative; display: flex; flex-direction: column; }
 		#gamess-editor {
-			flex: 1; border: none; padding: 20px;
-			font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.6;
-			background: #1e1e1e; color: #d4d4d4; outline: none;
+			flex: 1; border: none; padding: 15px;
+			font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.4;
+			background: #1e1e1e; color: #d4d4d4; outline: none; resize: none;
 		}
 		.editor-footer {
-			padding: 10px 20px; background: #2d2d2d; display: flex; justify-content: flex-end;
+			padding: 8px 15px; background: #2d2d2d; display: flex; justify-content: flex-end;
 		}
-		#ext-btn-download { background: var(--accent-orange); color: var(--white); border: none; padding: 8px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+		#ext-btn-download { background: var(--accent-orange); color: white; border: none; padding: 6px 15px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 11px; }
 
-		#global-resizer {
-			width: 10px; cursor: col-resize; position: absolute; left: 50%; top: 0; bottom: 0;
-			z-index: 1000; transform: translateX(-50%); background: transparent;
+		/* 垂直リサイザーバー */
+		.resizer-v {
+			width: 10px; cursor: col-resize; display: flex; align-items: center; justify-content: center;
+			background: transparent; z-index: 10;
 		}
-		#global-resizer::after { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--app-border); }
+		.resizer-v::after { content: ""; width: 2px; height: 40px; background: #ddd; border-radius: 2px; }
+		.resizer-v:hover::after { background: var(--accent-blue); }
 
-		footer { background: var(--app-header); padding: 0 24px; font-size: 11px; color: #70757a; border-top: 1px solid var(--app-border); height: 30px; display: flex; align-items: center; justify-content: flex-end; }
+		footer { background: var(--app-header); padding: 0 24px; font-size: 11px; color: #70757a; border-top: 1px solid var(--app-border); height: 25px; display: flex; align-items: center; justify-content: flex-end; }
 	</style>
 </head>
 
@@ -130,25 +129,25 @@
 			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
 			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
-			<button id="ext-btn-goto" class="header-btn" onclick="scrollToEditor()">Go to GAMESS Editor ↓</button>
 		</div>
 	</header>
 
-	<div class="app-container" id="scroll-container">
-		<div class="view-section" id="top-section">
-			<div id="section-left-top" class="tool-column col-left">
+	<div class="app-container">
+		<!-- 上段: 2Dエディタ & 3Dビューア -->
+		<div class="pane-row" id="row-top">
+			<div id="pane-2d" class="tool-pane col-left">
 				<div id="composer" data-widget="Kekule.Editor.Composer" data-predefined-setting="molOnly"></div>
 			</div>
-			<div id="global-resizer"></div>
-			<div id="section-right-top" class="tool-column col-right">
+			<div id="resizer-global" class="resizer-v"></div>
+			<div id="pane-3d" class="tool-pane col-right">
 				<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
 			</div>
 		</div>
 
-		<div class="editor-section" id="gamess-section">
-			<div id="section-left-bottom" class="tool-column col-left">
-				<h2 style="margin-top:0; font-size:18px; color:var(--accent-blue);">GAMESS Input Settings</h2>
-				<p style="font-size:12px; color:#666; margin-bottom:25px;">2026 Edition: 3D生成後、こちらで設定を変更してください。</p>
+		<!-- 下段: GAMESS設定 & エディタ -->
+		<div class="pane-row" id="row-bottom">
+			<div id="section-config" class="tool-pane col-left">
+				<h3 style="margin-top:0; font-size:14px; color:var(--accent-blue);">GAMESS Settings</h3>
 				<div class="config-grid">
 					<div class="config-group"><label>Theory (SCFTYP)</label>
 						<select id="cfg-scf" onchange="updateGamessText()"><option value="RHF">RHF</option><option value="UHF">UHF</option><option value="ROHF">ROHF</option></select>
@@ -163,12 +162,13 @@
 						<select id="cfg-charge" onchange="updateGamessText()"><option value="0">0</option><option value="1">+1</option><option value="-1">-1</option></select>
 					</div>
 				</div>
-				<button class="header-btn" style="margin-top:30px; border:1px solid #ccc;" onclick="scrollToTop()">↑ Back to Top</button>
 			</div>
-			<div id="section-right-bottom" class="tool-column col-right">
+			<!-- 下段の隙間埋め用ダミーリサイザー -->
+			<div class="resizer-v" style="cursor:default; opacity:0;"></div>
+			<div id="section-editor" class="tool-pane col-right">
 				<textarea id="gamess-editor" spellcheck="false"></textarea>
 				<div class="editor-footer">
-					<button id="ext-btn-download" onclick="downloadInp()">Download .inp File</button>
+					<button id="ext-btn-download" onclick="downloadInp()">Download .inp</button>
 				</div>
 			</div>
 		</div>
@@ -181,8 +181,6 @@
 	var calculator, timeStart;
 
 	function report(msg) { document.getElementById('state').innerHTML = msg; }
-	function scrollToEditor() { document.getElementById('gamess-section').scrollIntoView({ behavior: 'smooth' }); }
-	function scrollToTop() { document.getElementById('top-section').scrollIntoView({ behavior: 'smooth' }); }
 
 	function enableOpenBabel() {
 		Kekule.IO.enableOpenBabelFormats();
@@ -201,7 +199,7 @@
 		var lines = [];
 		lines.push(` $CONTRL SCFTYP=${document.getElementById('cfg-scf').value} RUNTYP=${document.getElementById('cfg-run').value} ICHG=${document.getElementById('cfg-charge').value} COORD=UNIQUE $END`);
 		lines.push(` $BASIS  GBASIS=${document.getElementById('cfg-basis').value} $END`);
-		lines.push(' $DATA\nGAMESS Input by GfEditer\nC1');
+		lines.push(' $DATA\nGAMESS Input by GfEditer (2026)\nC1');
 		for (var i = 0; i < mol.getNodeCount(); ++i) {
 			var node = mol.getNodeAt(i);
 			if (node instanceof Kekule.Atom) {
@@ -254,7 +252,8 @@
 		domBtnTerminate = document.getElementById('ext-btn-terminate');
 		domBtnBabel = document.getElementById('ext-btn-babel');
 
-		const resizer = document.getElementById('global-resizer');
+		// 左右リサイズ同期ロジック
+		const resizer = document.getElementById('resizer-global');
 		const leftCols = document.querySelectorAll('.col-left');
 		let isResizing = false;
 
@@ -264,7 +263,6 @@
 			const newWidth = (e.clientX / window.innerWidth) * 100;
 			if (newWidth > 15 && newWidth < 85) {
 				leftCols.forEach(el => el.style.flex = `0 0 ${newWidth}%`);
-				resizer.style.left = newWidth + '%';
 				syncSizes();
 			}
 		});
