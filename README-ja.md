@@ -1,6 +1,6 @@
 # 🧪 GfEditer - Dual Mode Molecular Editer
 
-
+README in [English](https://github.com/RyokoKuga/GfEditor/blob/main/README.md)
 
 **GfEditer** は、Webブラウザ上で分子構造のモデリングから、量子化学計算ソフト **GAMESS** 用の入力ファイル（`.inp`）生成までをシームレスに行うための高機能支援ツールです。
 
