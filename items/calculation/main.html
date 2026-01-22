@@ -1,18 +1,30 @@
 <!doctype html>
-<html manifest_no_use="gen3D.manifest1">
+<html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>3D Structure Generator - Final Fix</title>
+<title>3D Structure Generator - Professional Edition</title>
 
+	<!-- ライブラリ読み込み -->
 	<script src="../../libs/Three.js"></script>
 	<script src="../../libs/raphael-min.2.0.1.js"></script>
 	<script src="../../libs/kekule/kekule.js?modules=calculation,chemWidget,openbabel"></script>
 	<link rel="stylesheet" type="text/css" href="../../libs/kekule/themes/default/kekule.css" />
 	
 	<style>
+		/* Chromeライクなモダン・ライトデザイン */
+		:root {
+			--chrome-bg: #f1f3f4;
+			--chrome-border: #dadce0;
+			--chrome-text: #3c4043;
+			--chrome-blue: #1a73e8;
+			--chrome-blue-hover: #1765cc;
+			--white: #ffffff;
+		}
+
 		body {
-			background-color: #111;
-			color: #eee;
+			background-color: var(--chrome-bg);
+			color: var(--chrome-text);
+			font-family: 'Segoe UI', Tahoma, sans-serif;
 			margin: 0;
 			display: flex;
 			flex-direction: column;
@@ -20,51 +32,99 @@
 			overflow: hidden;
 		}
 
-		#state {
-			background: #222;
-			padding: 5px;
-			text-align: center;
-			color: #00d4ff;
-			border-bottom: 1px solid #444;
+		/* ヘッダーエリア */
+		header {
+			background-color: var(--white);
+			padding: 10px 20px;
+			border-bottom: 1px solid var(--chrome-border);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+			z-index: 100;
 		}
 
-		/* 左右をテーブル状に完全に分けるコンテナ */
+		h1 {
+			margin: 0;
+			font-size: 18px;
+			font-weight: 500;
+			color: var(--chrome-text);
+		}
+
+		#state {
+			font-size: 13px;
+			color: var(--chrome-blue);
+			background: #e8f0fe;
+			padding: 4px 12px;
+			border-radius: 16px;
+			font-weight: 500;
+		}
+
+		/* メインコンテンツ（左右分割） */
 		.main-container {
 			display: flex;
 			flex: 1;
-			width: 100vw;
+			gap: 12px;
+			padding: 12px;
 			box-sizing: border-box;
-			overflow: hidden;
+			min-height: 0;
 		}
 
-		.widget-wrapper {
+		.tool-section {
 			flex: 1;
-			position: relative; /* ウィジェット配置の基準点 */
-			border: 1px solid #444;
-			box-sizing: border-box;
+			display: flex;
+			flex-direction: column;
+			background-color: var(--white);
+			border: 1px solid var(--chrome-border);
+			border-radius: 8px;
+			box-shadow: 0 1px 2px 0 rgba(60,64,67,.3);
+			overflow: hidden;
+			position: relative;
 		}
 
-		/* ウィジェット本体を親要素いっぱいに広げる */
+		.section-header {
+			padding: 8px 15px;
+			background: #f8f9fa;
+			border-bottom: 1px solid var(--chrome-border);
+			font-size: 12px;
+			font-weight: bold;
+			color: #5f6368;
+			text-transform: uppercase;
+		}
+
+		/* ウィジェットをBOX内で最大化 */
 		#composer, #chemViewer {
 			position: absolute !important;
-			top: 0; left: 0; right: 0; bottom: 0;
+			top: 35px; /* header分 */
+			left: 0;
+			right: 0;
+			bottom: 0;
 			width: 100% !important;
-			height: 100% !important;
+			height: calc(100% - 35px) !important;
 		}
 
-		/* 3DビューアのツールバーをCSSで最前面に固定 */
+		/* 3Dツールバーの常時表示設定 */
 		.K-ChemWidget-Toolbar {
 			opacity: 1 !important;
 			visibility: visible !important;
-			background: rgba(50, 50, 50, 0.9) !important;
-			z-index: 1000 !important;
+			background: rgba(255, 255, 255, 0.9) !important;
+			border: 1px solid var(--chrome-border) !important;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 		}
 
-		#description {
-			background: #222;
-			padding: 10px;
+		/* フッター説明 */
+		footer {
+			background-color: var(--white);
+			padding: 8px 20px;
 			font-size: 12px;
-			border-top: 1px solid #444;
+			color: #70757a;
+			border-top: 1px solid var(--chrome-border);
+		}
+
+		/* KekuleボタンをChrome風に */
+		.K-Button {
+			border-radius: 4px !important;
+			transition: background 0.2s !important;
 		}
 	</style>
 
@@ -76,8 +136,8 @@
 	var composer, viewer, btnGen, btnTerminate;	
 	var calculator, timeStart, timeEnd;
 	
-	function report(stateText) {
-		document.getElementById('state').innerHTML = stateText;
+	function report(msg) {
+		document.getElementById('state').innerHTML = msg;
 	}
 	
 	function getCurrMol() {
@@ -86,7 +146,7 @@
 	
 	function generate3D() {
 		var mol = getCurrMol();
-		report('Calculating...');
+		report('Calculating 3D optimization...');
 		btnGen.setEnabled(false);
 		btnTerminate.setEnabled(true);
 		timeStart = Date.now();
@@ -98,25 +158,25 @@
 				timeEnd = Date.now();
 				var elapse = (timeEnd - timeStart) / 1000;
 				viewer.setChemObj(generatedMol);
-				report('Calculation done in ' + elapse + ' sec');
+				report('Ready - Done in ' + elapse + 's');
 			},
 			function(err) {
 				btnGen.setEnabled(true);
 				btnTerminate.setEnabled(false);
-				report(err.getMessage ? err.getMessage() : err);
+				report('Error occurred');
 			}
 		);
 	}
 
 	function terminate() {
-		report('Terminated');
+		report('Calculation halted');
 		btnGen.setEnabled(true);
 		btnTerminate.setEnabled(false);
 		if (calculator) calculator.halt();
 	}
 
-	// 描画サイズを強制的に更新する関数
-	function resizeWidgets() {
+	// 描画サイズをコンテナに強制フィットさせる
+	function syncSizes() {
 		if (composer) composer.notifyObjectSizeChanged();
 		if (viewer) viewer.notifyObjectSizeChanged();
 	}
@@ -125,24 +185,23 @@
 		viewer = Kekule.Widget.getWidgetById('chemViewer');
 		composer = Kekule.Widget.getWidgetById('composer');
 		
-		// ボタン追加
 		var toolButtons = composer.getCommonToolButtons() || composer.getDefaultCommonToolBarButtons();
+		
 		toolButtons.push({
-			'id': 'btnGen', 'text': 'Generate 3D', 'showText': true, 'cssText': 'width:auto', '#execute': generate3D
+			'id': 'btnGen', 'text': 'Generate 3D', 'hint': 'Generate 3D', 'showText': true, 'cssText': 'width:auto; color:#fff; background:#1a73e8;', '#execute': generate3D
 		});
 		toolButtons.push({
-			'id': 'btnTerminate', 'text': 'Terminate', 'showText': true, 'cssText': 'width:auto', '#execute': terminate
+			'id': 'btnTerminate', 'text': 'Terminate', 'hint': 'Stop', 'showText': true, 'cssText': 'width:auto;', '#execute': terminate
 		});
+		
 		composer.setCommonToolButtons(toolButtons);
 		
 		btnGen = Kekule.Widget.getWidgetById('btnGen');
 		btnTerminate = Kekule.Widget.getWidgetById('btnTerminate');
 		btnTerminate.setEnabled(false);
 
-		// ウィンドウのリサイズイベントに登録
-		window.addEventListener('resize', resizeWidgets);
-		// 初期ロード後にもう一度サイズを確定させる
-		setTimeout(resizeWidgets, 100);
+		window.addEventListener('resize', syncSizes);
+		setTimeout(syncSizes, 200);
 	}
 	
 	Kekule.X.domReady(init);
@@ -150,20 +209,26 @@
 </head>
 
 <body>
-	<div id="state">Ready</div>
+	<header>
+		<h1>3D Structure Generator</h1>
+		<div id="state">Ready</div>
+	</header>
 
 	<div class="main-container">
-		<div class="widget-wrapper">
+		<div class="tool-section">
+			<div class="section-header">2D Structure Editor</div>
 			<div id="composer" data-widget="Kekule.Editor.Composer" data-chem-obj="url(#molSrc)" data-predefined-setting="molOnly"></div>
 		</div>
-		<div class="widget-wrapper">
+		
+		<div class="tool-section">
+			<div class="section-header">3D Molecular Viewer</div>
 			<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" 
 				data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
 		</div>
 	</div>
 
-	<div id="description">
-		2Dで編集し「Generate 3D」をクリックしてください。左右分割で全画面表示されます。
-	</div>
+	<footer>
+		Draw molecules on the left, click <strong>"Generate 3D"</strong> to optimize. This tool runs entirely in your browser.
+	</footer>
 </body>
 </html>
