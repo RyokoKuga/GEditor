@@ -50,11 +50,11 @@
 			border-radius: 12px;
 		}
 
-		/* メインコンテナをFlex列に */
+		/* メインコンテナを横並びに設定 */
 		.app-container {
 			flex: 1;
 			display: flex;
-			flex-direction: column;
+			flex-direction: row; /* 横並び */
 			min-height: 0;
 		}
 
@@ -63,21 +63,22 @@
 			flex-direction: column;
 			background: var(--white);
 			position: relative;
-			min-height: 100px;
+			min-width: 100px;
 		}
 
-		/* 2Dと3Dの初期比率 */
-		#section-top { flex: 0 0 45%; }
-		#section-bottom { flex: 1; }
+		/* 初期比率（左右50%ずつ） */
+		#section-left { flex: 0 0 50%; }
+		#section-right { flex: 1; }
 
-		/* ドラッグできる境界線（リサイザ） */
+		/* 左右の境界線（垂直リサイザ） */
 		#resizer {
-			height: 8px;
+			width: 8px;
 			background: var(--chrome-bg);
-			cursor: row-resize;
-			border-top: 1px solid var(--chrome-border);
-			border-bottom: 1px solid var(--chrome-border);
+			cursor: col-resize;
+			border-left: 1px solid var(--chrome-border);
+			border-right: 1px solid var(--chrome-border);
 			transition: background 0.2s;
+			z-index: 20;
 		}
 		#resizer:hover { background: var(--chrome-border); }
 
@@ -96,7 +97,6 @@
 			height: 100% !important;
 		}
 
-		/* 3Dツールバーの視認性向上 */
 		.K-ChemWidget-Toolbar {
 			opacity: 1 !important;
 			background: rgba(255, 255, 255, 0.9) !important;
@@ -115,7 +115,7 @@
 	</style>
 
 	<script id="molSrc" type="chemical/x-kekule-json">
-	{"id":"m1","info":{"generator":"ChemDraw","date":{"__type__":"date","date":"Sat, 05 Sep 2015 11:46:28 GMT"},"__type__":"object"},"renderOptions":{"expanded":true,"__type__":"object"},"coord2D":{"x":12.375,"y":37.3811,"__type__":"object"},"charge":0,"parity":null,"ctab":{"nodes":[{"__type__":"Kekule.Atom","id":"a4","coord2D":{"x":0.7958,"y":0.4315,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a11","coord2D":{"x":0.0117,"y":0.1764,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a5","coord2D":{"x":0.7958,"y":1.2565,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a3","coord2D":{"x":1.5115,"y":0.0175,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a14","coord2D":{"x":0.0117,"y":-1.4648,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a7","coord2D":{"x":-0.4738,"y":0.8439,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a6","coord2D":{"x":1.5115,"y":1.6689,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a8","coord2D":{"x":0.0117,"y":1.5115,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a2","coord2D":{"x":2.2257,"y":0.4315,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a15","coord2D":{"x":-1.1048,"y":-1.0509,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a13","coord2D":{"x":-0.4095,"y":-1.9488,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a21","coord2D":{"x":0.0117,"y":-2.1732,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a1","coord2D":{"x":2.2257,"y":1.2565,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a9","coord2D":{"x":1.5115,"y":2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a10","coord2D":{"x":2.9428,"y":0.0175,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a16","coord2D":{"x":-2.2272,"y":-1.4648,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a12","coord2D":{"x":-1.7972,"y":-1.9488,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a19","coord2D":{"x":-0.4095,"y":-1.5231,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a17","coord2D":{"x":-0.4095,"y":-2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a22","coord2D":{"x":-2.2272,"y":-0.8031,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a23","coord2D":{"x":-2.2272,"y":-2.1732,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a18","coord2D":{"x":-1.7972,"y":-2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a20","coord2D":{"x":-1.7972,"y":-1.5231,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a24","coord2D":{"x":-2.9428,"y":-0.3892,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"}],"anchorNodes":[],"connectors":[{"__type__":"Kekule.Bond","id":"b25","connectedNodes":},{"__type__":"Kekule.Bond","id":"b4","connectedNodes":},{"__type__":"Kekule.Bond","id":"b3","connectedNodes":},{"__type__":"Kekule.Bond","id":"b23","connectedNodes":},{"__type__":"Kekule.Bond","id":"b26","connectedNodes":},{"__type__":"Kekule.Bond","id":"b5","connectedNodes":},{"__type__":"Kekule.Bond","id":"b8","connectedNodes":},{"__type__":"Kekule.Bond","id":"b2","connectedNodes":},{"__type__":"Kekule.Bond","id":"b13","connectedNodes":},{"__type__":"Kekule.Bond","id":"b12","connectedNodes":},{"__type__":"Kekule.Bond","id":"b20","connectedNodes":},{"__type__":"Kekule.Bond","id":"b7","connectedNodes":},{"__type__":"Kekule.Bond","id":"b6","connectedNodes":},{"__type__":"Kekule.Bond","id":"b9","connectedNodes":},{"__type__":"Kekule.Bond","id":"b1","connectedNodes":},{"__type__":"Kekule.Bond","id":"b10","connectedNodes":},{"__type__":"Kekule.Bond","id":"b14","connectedNodes":},{"__type__":"Kekule.Bond","id":"b11","connectedNodes":},{"__type__":"Kekule.Bond","id":"b18","connectedNodes":},{"__type__":"Kekule.Bond","id":"b16","connectedNodes":},{"__type__":"Kekule.Bond","id":"b15","connectedNodes":},{"__type__":"Kekule.Bond","id":"b21","connectedNodes":},{"__type__":"Kekule.Bond","id":"b22","connectedNodes":},{"__type__":"Kekule.Bond","id":"b17","connectedNodes":},{"__type__":"Kekule.Bond","id":"b19","connectedNodes":},{"__type__":"Kekule.Bond","id":"b24","connectedNodes":}],"__type":"Kekule.StructureConnectionTable"},"name":"Molecule","__type":"Kekule.Molecule"}
+	{"id":"m1","info":{"generator":"ChemDraw","date":{"__type__":"date","date":"Sat, 05 Sep 2015 11:46:28 GMT"},"__type__":"object"},"renderOptions":{"expanded":true,"__type__":"object"},"coord2D":{"x":12.375,"y":37.3811,"__type__":"object"},"charge":0,"parity":null,"ctab":{"nodes":[{"__type__":"Kekule.Atom","id":"a4","coord2D":{"x":0.7958,"y":0.4315,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a11","coord2D":{"x":0.0117,"y":0.1764,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a5","coord2D":{"x":0.7958,"y":1.2565,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a3","coord2D":{"x":1.5115,"y":0.0175,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a14","coord2D":{"x":0.0117,"y":-1.4648,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a7","coord2D":{"x":-0.4738,"y":0.8439,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a6","coord2D":{"x":1.5115,"y":1.6689,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a8","coord2D":{"x":0.0117,"y":1.5115,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a2","coord2D":{"x":2.2257,"y":0.4315,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a15","coord2D":{"x":-1.1048,"y":-1.0509,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a13","coord2D":{"x":-0.4095,"y":-1.9488,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a21","coord2D":{"x":0.0117,"y":-2.1732,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a1","coord2D":{"x":2.2257,"y":1.2565,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a9","coord2D":{"x":1.5115,"y":2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a10","coord2D":{"x":2.9428,"y":0.0175,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"N"},{"__type__":"Kekule.Atom","id":"a16","coord2D":{"x":-2.2272,"y":-1.4648,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a12","coord2D":{"x":-1.7972,"y":-1.9488,"__type__":"object"},"charge":0,"parity":0,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a19","coord2D":{"x":-0.4095,"y":-1.5231,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a17","coord2D":{"x":-0.4095,"y":-2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a22","coord2D":{"x":-2.2272,"y":-0.8031,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"C"},{"__type__":"Kekule.Atom","id":"a23","coord2D":{"x":-2.2272,"y":-2.1732,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a18","coord2D":{"x":-1.7972,"y":-2.4939,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"},{"__type__":"Kekule.Atom","id":"a20","coord2D":{"x":-1.7972,"y":-1.5231,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"H"},{"__type__":"Kekule.Atom","id":"a24","coord2D":{"x":-2.9428,"y":-0.3892,"__type__":"object"},"charge":0,"parity":null,"isotopeId":"O"}],"anchorNodes":[],"connectors":[{"__type":"Kekule.Bond","id":"b25","connectedNodes":},{"__type__":"Kekule.Bond","id":"b4","connectedNodes":},{"__type__":"Kekule.Bond","id":"b3","connectedNodes":},{"__type__":"Kekule.Bond","id":"b23","connectedNodes":},{"__type__":"Kekule.Bond","id":"b26","connectedNodes":},{"__type__":"Kekule.Bond","id":"b5","connectedNodes":},{"__type__":"Kekule.Bond","id":"b8","connectedNodes":},{"__type__":"Kekule.Bond","id":"b2","connectedNodes":},{"__type__":"Kekule.Bond","id":"b13","connectedNodes":},{"__type__":"Kekule.Bond","id":"b12","connectedNodes":},{"__type__":"Kekule.Bond","id":"b20","connectedNodes":},{"__type__":"Kekule.Bond","id":"b7","connectedNodes":},{"__type__":"Kekule.Bond","id":"b6","connectedNodes":},{"__type__":"Kekule.Bond","id":"b9","connectedNodes":},{"__type__":"Kekule.Bond","id":"b1","connectedNodes":},{"__type__":"Kekule.Bond","id":"b10","connectedNodes":},{"__type__":"Kekule.Bond","id":"b14","connectedNodes":},{"__type__":"Kekule.Bond","id":"b11","connectedNodes":},{"__type__":"Kekule.Bond","id":"b18","connectedNodes":},{"__type__":"Kekule.Bond","id":"b16","connectedNodes":},{"__type__":"Kekule.Bond","id":"b15","connectedNodes":},{"__type__":"Kekule.Bond","id":"b21","connectedNodes":},{"__type__":"Kekule.Bond","id":"b22","connectedNodes":},{"__type__":"Kekule.Bond","id":"b17","connectedNodes":},{"__type__":"Kekule.Bond","id":"b19","connectedNodes":},{"__type__":"Kekule.Bond","id":"b24","connectedNodes":}],"__type":"Kekule.StructureConnectionTable"},"name":"Molecule","__type":"Kekule.Molecule"}
 	</script>
 	
 	<script>
@@ -172,18 +172,17 @@
 		btnTerminate = Kekule.Widget.getWidgetById('btnTerminate');
 		btnTerminate.setEnabled(false);
 
-		// リサイザの実装
+		// リサイザの実装（左右幅調整）
 		const resizer = document.getElementById('resizer');
-		const topSide = document.getElementById('section-top');
+		const leftSide = document.getElementById('section-left');
 		let isResizing = false;
 
-		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'row-resize'; });
+		resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize'; });
 		window.addEventListener('mousemove', (e) => {
 			if (!isResizing) return;
-			const offsetTop = 45; // Header height
-			const newHeight = ((e.clientY - offsetTop) / (window.innerHeight - offsetTop - 25)) * 100;
-			if (newHeight > 10 && newHeight < 90) {
-				topSide.style.flex = `0 0 ${newHeight}%`;
+			const newWidth = (e.clientX / window.innerWidth) * 100;
+			if (newWidth > 15 && newWidth < 85) {
+				leftSide.style.flex = `0 0 ${newWidth}%`;
 				syncSizes();
 			}
 		});
@@ -204,14 +203,14 @@
 	</header>
 
 	<div class="app-container">
-		<div id="section-top" class="tool-section">
+		<div id="section-left" class="tool-section">
 			<div class="section-label">2D EDITOR</div>
 			<div id="composer" data-widget="Kekule.Editor.Composer" data-chem-obj="url(#molSrc)" data-predefined-setting="molOnly"></div>
 		</div>
 		
 		<div id="resizer"></div>
 		
-		<div id="section-bottom" class="tool-section">
+		<div id="section-right" class="tool-section">
 			<div class="section-label">3D VIEW</div>
 			<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" 
 				data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
@@ -219,7 +218,7 @@
 	</div>
 
 	<footer>
-		2Dで描画し「Generate 3D」をクリック。境界線をドラッグしてサイズを調整できます。
+		2Dで編集し「Generate 3D」をクリック。境界線をドラッグして左右の幅を調整できます。
 	</footer>
 </body>
 </html>
