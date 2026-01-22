@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>3D Molecular Studio Pro - V003</title>
+<title>GfEditer - 3D Molecular Studio</title>
 
 	<!-- ライブラリ群 -->
 	<script src="../../libs/Three.js"></script>
@@ -48,7 +48,10 @@
 
 		.header-left { display: flex; align-items: center; gap: 20px; }
 		.header-right { display: flex; align-items: center; gap: 8px; }
-		.logo { font-size: 18px; font-weight: 700; color: var(--app-text-main); letter-spacing: -0.5px; }
+		
+		/* ロゴタイトルのスタイル変更 */
+		.logo { font-size: 20px; font-weight: 700; color: var(--app-text-main); letter-spacing: -0.5px; }
+		.logo span.g-accent { color: var(--accent-blue); }
 
 		#state {
 			font-size: 12px;
@@ -123,6 +126,9 @@
 			align-items: center;
 			justify-content: space-between;
 		}
+
+		footer a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
+		footer a:hover { text-decoration: underline; }
 	</style>
 	
 	<script>
@@ -181,7 +187,6 @@
 		domBtnTerminate = document.getElementById('ext-btn-terminate');
 		domBtnBabel = document.getElementById('ext-btn-babel');
 		
-		// Resizer logic
 		const resizer = document.getElementById('resizer');
 		const leftSide = document.getElementById('section-left');
 		let isResizing = false;
@@ -208,7 +213,8 @@
 <body>
 	<header>
 		<div class="header-left">
-			<div class="logo">Molecular Studio <span style="color:var(--accent-blue)">Pro</span></div>
+			<!-- タイトルの変更と「G」へのアクセント適用 -->
+			<div class="logo"><span class="g-accent">G</span>fEditer</div>
 			<div id="state">Ready</div>
 		</div>
 		<div class="header-right">
@@ -219,14 +225,12 @@
 	</header>
 
 	<div class="app-container">
-		<!-- 左側：2Dエディタ（データなし・空の状態で開始） -->
 		<div id="section-left" class="tool-section">
 			<div id="composer" data-widget="Kekule.Editor.Composer" data-predefined-setting="molOnly"></div>
 		</div>
 		
 		<div id="resizer"></div>
 		
-		<!-- 右側：3Dビューア -->
 		<div id="section-right" class="tool-section">
 			<div id="chemViewer" data-widget="Kekule.ChemWidget.Viewer3D" data-predefined-setting="fullFunc" 
 				data-toolbar-evoke-modes="" data-toolbar-pos="1"></div>
@@ -234,8 +238,9 @@
 	</div>
 
 	<footer>
-		<div>Version 0.0.3 (2026 Edition)</div>
-		<div>Draw a molecule on the left canvas to begin.</div>
+		<!-- フッターのクレジット修正とリンク追加 -->
+		<div><a href="https://partridgejiang.github.io" target="_blank" rel="noopener noreferrer">Powered by Kekule.js</a></div>
+		<div>Draw a molecule on the left canvas to begin. (2026 Edition)</div>
 	</footer>
 </body>
 </html>
