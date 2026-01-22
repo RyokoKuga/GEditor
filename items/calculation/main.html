@@ -49,7 +49,7 @@
 		.header-left { display: flex; align-items: center; gap: 20px; }
 		.header-right { display: flex; align-items: center; gap: 8px; }
 		
-		/* ロゴタイトルのスタイル変更 */
+		/* ロゴタイトルのスタイル（Gにアクセント） */
 		.logo { font-size: 20px; font-weight: 700; color: var(--app-text-main); letter-spacing: -0.5px; }
 		.logo span.g-accent { color: var(--accent-blue); }
 
@@ -124,11 +124,8 @@
 			height: 30px;
 			display: flex;
 			align-items: center;
-			justify-content: space-between;
+			justify-content: center; /* 中央揃えに変更 */
 		}
-
-		footer a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
-		footer a:hover { text-decoration: underline; }
 	</style>
 	
 	<script>
@@ -213,7 +210,6 @@
 <body>
 	<header>
 		<div class="header-left">
-			<!-- タイトルの変更と「G」へのアクセント適用 -->
 			<div class="logo"><span class="g-accent">G</span>fEditer</div>
 			<div id="state">Ready</div>
 		</div>
@@ -238,9 +234,7 @@
 	</div>
 
 	<footer>
-		<!-- フッターのクレジット修正とリンク追加 -->
-		<div><a href="https://partridgejiang.github.io" target="_blank" rel="noopener noreferrer">Powered by Kekule.js</a></div>
-		<div>Draw a molecule on the left canvas to begin. (2026 Edition)</div>
+		<div>Powered by Kekule.js</div>
 	</footer>
 </body>
 </html>
