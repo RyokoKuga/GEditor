@@ -31,7 +31,7 @@
 		#ext-btn-gen { background: var(--accent-blue); color: var(--white); }
 		#ext-btn-terminate { background-color: var(--accent-red); color: var(--white); border-color: var(--accent-red); }
 		#ext-btn-terminate:disabled { background-color: transparent; color: #bdc1c6; border-color: #e0e2e6; opacity: 0.35; cursor: default; }
-		#ext-btn-babel { background: white; border-color: var(--app-border); color: #3c4043; }
+		#ext-btn-babel { background: white; border-color: var(--app-border); color: #3c4043; margin-left: 10px; }
 		#ext-btn-babel.active { background: #e6f4ea; color: #1e8e3e; border-color: #1e8e3e; }
 		#ext-btn-switch { background: #3c4043; color: var(--white); margin-left: 4px; }
 		.app-container { flex: 1; position: relative; min-height: 0; }
@@ -60,11 +60,11 @@
 		<div style="display:flex; align-items:center;">
 			<div class="logo"><span style="color:var(--accent-blue)">G</span>fEditer</div>
 			<div id="state">Modeling Mode</div>
+			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 		</div>
 		<div class="header-right">
 			<button id="ext-btn-gen" class="header-btn" onclick="generate3D()">Generate 3D</button>
 			<button id="ext-btn-terminate" class="header-btn" onclick="terminate()" disabled>Terminate</button>
-			<button id="ext-btn-babel" class="header-btn" onclick="enableOpenBabel()">Enable OpenBabel</button>
 			<button id="ext-btn-switch" class="header-btn" onclick="toggleMode()">Switch to Editor Mode</button>
 		</div>
 	</header>
